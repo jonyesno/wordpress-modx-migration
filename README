@@ -1,1 +1,35 @@
 Quick'n'dirty scripts to migrate blog content from Wordpress to ModX.
+
+FILES
+
+* config.rb     - db connection details
+* wordpress.rb - Wordpress class to discover posts, categories, comments
+* modx         - similar for ModX, also creates new posts, categories, comments
+* migration.rb - uses Wordpress and ModX classes to migrate the data
+* migrate.rb   - trivial wrapper
+
+USAGE
+
+$ ./migrate.rb
+
+NOTES
+
+The migration recreates posts and comments every time it is run, but it
+won't touch content already in ModX, so it can be repeatedly run to keep
+the two sites in sync during a migration period.
+
+During the migration we try to re-encode content in UTF-8 as required.
+
+Wordpress comments have no subject, but ModX ones do. The ModX comments
+mappings need some additional work.
+
+ModX categories (tags) - are denormalised into a per-post array.
+
+THANKS
+
+Thanks to Matthew Killock for letting me use his PHP script to guide
+the Wordpress -> ModX mappings.
+
+
+
+
