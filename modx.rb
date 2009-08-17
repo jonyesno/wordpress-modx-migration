@@ -8,9 +8,14 @@ class ModX
 
   def initialize(template)
     @db = Mysql.init
-    @db.options(Mysql::SET_CHARSET_NAME, 'utf8')
-    @db.real_connect("127.0.0.1", "org", "", "org_modx")
-    @db.query("SET NAMES utf8")
+    @db.options(Mysql::SET_CHARSET_NAME, Config.modx[:charset])
+    @db.real_connect(
+      Config.modx[:host],
+      Config.modx[:user],
+      Config.modx[:pass],
+      Config.modx[:db]
+    )
+    @db.query("SET NAMES #{Config.modx[:charset]}")
     
     @post_template_id = self.find_template_id(template)
     @post_category_id = self.find_category_id

@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'mysql'
 require 'ostruct'
+require 'config'
 
 # unsure if this is easier than bending AR / DM to WP schema?
 class Wordpress
@@ -9,9 +10,14 @@ class Wordpress
 
   def initialize
     @db = Mysql.init
-    @db.options(Mysql::SET_CHARSET_NAME, 'latin1')
-    @db.real_connect("127.0.0.1", "org", "", "org_wp")
-    @db.query("SET NAMES latin1")
+    @db.options(Mysql::SET_CHARSET_NAME, Config.wordpress[:charset])
+    @db.real_connect(
+      Config.wordpress[:host],
+      Config.wordpress[:user],
+      Config.wordpress[:pass],
+      Config.wordpress[:db]
+    )
+    @db.query("SET NAMES #{Config.wordpress[:charset]}")
 
     @posts = []
     @categories = []
@@ -56,7 +62,7 @@ class Wordpress
   end
 
   # XXX we load all the data in at once, ouch
-  # this is fine on this dataset but would better to defer the post/comment content until needed
+  # this is fine on this dataset of ~1k posts but would better to defer the post/comment content until needed
   def load_posts
     q = @db.query("select *
                    from wp_posts as p
