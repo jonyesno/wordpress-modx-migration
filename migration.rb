@@ -1,5 +1,6 @@
 require 'wordpress'
 require 'modx'
+require 'config'
 require 'UniversalDetector'
 require 'iconv'
 
@@ -7,16 +8,18 @@ class Migration
 
   def initialize
     @wp   = Wordpress.new
-    @modx = ModX.new('Blog')
+    @modx = ModX.new(Config.modx[:root_template])
 
     @template = @modx.post_template_id
-    @root     = @modx.find_content(:pagetitle => 'Blog')
+    @root     = @modx.find_content(:pagetitle => Config.modx[:root_content])
 
     @default_author = 1
   end
 
   def find_or_create_blog_year(date)
-    parent = @modx.find_content(:pagetitle => date.year.to_s)
+    epochtime = date.strftime('%s')
+    parent    = @modx.find_content(:pagetitle => date.year.to_s)
+
     if (parent.nil?)
       STDERR.puts "[migrate] new year #{date.year}"
       modx_blog_year = {
@@ -26,7 +29,7 @@ class Migration
         :alias       => date.year.to_s,
         :published   => 1,
         :pub_date    => epochtime,
-        :parent      => root,
+        :parent      => @root,
         :isfolder    => 1,
         :richtext    => 1,
         :template    => @template,
@@ -58,7 +61,7 @@ class Migration
   end
 
   def migrate_all_posts
-    @wp.posts[0 .. 20 ].each { |wp_post| self.migrate_post(wp_post) }
+    @wp.posts.each { |wp_post| self.migrate_post(wp_post) }
   end
 
   def migrate_post(wp_post)
