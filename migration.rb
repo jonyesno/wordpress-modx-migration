@@ -110,7 +110,7 @@ class Migration
       date      = DateTime.parse(wp_comment.comment_date)
       epochtime = date.strftime('%s')
       modx_comment = {
-        :title       => '(comment title)',
+        :title       => '',
         :published   => 1,
         :content     => wp_comment.comment_content,
         :createdby   => 0, # 0 here means ModX will look at jot_fields for author, fwict
@@ -119,7 +119,7 @@ class Migration
         :flags       => wp_comment.comment_type, # trackback or pingback, unsure if it belongs here
         :mode        => 0,
         :secip       => wp_comment.comment_author_IP,
-        :sechash     => 'foo',       # anyone editing the comment (?)
+        :sechash     => 'foo',       
 
         :name        => wp_comment.comment_author,
         :email       => wp_comment.comment_author_email,
