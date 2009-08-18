@@ -20,11 +20,13 @@ class Wordpress
     @db.query("SET NAMES #{Config.wordpress[:charset]}")
 
     @posts      = []
+    @pages      = []
     @categories = []
     @users      = {}
 
     self.load_categories
     self.load_posts
+    self.load_pages
     self.load_users
     @db.close
   end
@@ -66,19 +68,29 @@ class Wordpress
 
   # XXX we load all the data in at once, ouch
   # this is fine on this dataset of ~1k posts but would better to defer the post/comment content until needed
-  def load_posts
+  def load_content(post_type)
+    content = []
     q = @db.query("select distinct *
                    from wp_posts as p
-                   where p.post_type = 'post' and p.post_status = 'publish'
+                   where p.post_type = '#{post_type}' and p.post_status = 'publish'
                    order by id desc")
 
     q.each_hash do |p|
       post = OpenStruct.new(p)
       post.categories = self.post_categories(post.ID).map { |c| @categories[c] }
       post.comments   = self.post_comments(post.ID)
-      @posts.push post
+      content.push post
     end
 
+    return content
+  end
+
+  def load_posts
+    @posts = self.load_content("post")
+  end
+
+  def load_pages
+    @pages = self.load_content("page")
   end
 
   # work out what categories exist via the taxonomy tables
@@ -103,8 +115,8 @@ class Wordpress
     end
   end
 
-  def list_posts
-    @posts.each do |p|
+  def list_content(content)
+    content.each do |p|
       puts %Q{#{p.ID} #{p.post_date} "#{p.post_title}" #{p.categories.map { |c| c.name }.join(',')} }
         if p.comments.length == 0
           puts "(no comments)"
@@ -115,6 +127,14 @@ class Wordpress
         end
 
     end
+  end
+
+  def list_posts
+    self.list_content(@posts)
+  end
+
+  def list_pages
+    self.list_content(@pages)
   end
 
   def list_users

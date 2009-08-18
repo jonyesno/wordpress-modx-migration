@@ -3,5 +3,6 @@
 require 'wordpress'
 
 wp = Wordpress.new
-wp.list_users
+wp.list_posts
+wp.list_pages
 
