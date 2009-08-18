@@ -14,7 +14,10 @@ class Migration
     @root     = @modx.find_content(:pagetitle => Config.modx[:root_content])
 
     @default_author = 1
+
+    @user_map = {}
   end
+    
 
   def find_or_create_blog_year(date)
     epochtime = date.strftime('%s')
@@ -92,11 +95,11 @@ class Migration
       :menuindex   => 0,
       :searchable  => 1,
       :cacheable   => 1,
-      :createdby   => @default_author,
+      :createdby   => @user_map[wp_post.post_author],
       :createdon   => epochtime,
-      :editedby    => @default_author,
+      :editedby    => @user_map[wp_post.post_author],
       :editedon    => epochtime,
-      :publishedby => @default_author,
+      :publishedby => @user_map[wp_post.post_author],
       :publishedon => epochtime,
       :hidemenu    => 0
     }
@@ -131,5 +134,23 @@ class Migration
     @modx.add_post_comments(modx_post, modx_comments) 
   end
 
+  def migrate_users
+    @wp.users.keys.each do |k|
+      wp_user = @wp.users[k]
+      modx_user = {
+        :username => wp_user.user_login,
+        :email    => wp_user.user_email,
+        :fullname => wp_user.display_name,
+        :role     => 1 # manager?
+      }
+
+      # @modx.delete_user(modx_user)
+      if id = @modx.find_user(modx_user)
+        @user_map[wp_user.ID] = id
+      else
+        @user_map[wp_user.ID] = @modx.add_user(modx_user)
+      end
+    end
+  end
 end
 

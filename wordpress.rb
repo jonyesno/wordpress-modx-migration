@@ -6,7 +6,7 @@ require 'config'
 # unsure if this is easier than bending AR / DM to WP schema?
 class Wordpress
 
-  attr_reader :posts
+  attr_reader :posts, :users
 
   def initialize
     @db = Mysql.init
@@ -19,10 +19,13 @@ class Wordpress
     )
     @db.query("SET NAMES #{Config.wordpress[:charset]}")
 
-    @posts = []
+    @posts      = []
     @categories = []
+    @users      = {}
+
     self.load_categories
     self.load_posts
+    self.load_users
     @db.close
   end
 
@@ -64,7 +67,7 @@ class Wordpress
   # XXX we load all the data in at once, ouch
   # this is fine on this dataset of ~1k posts but would better to defer the post/comment content until needed
   def load_posts
-    q = @db.query("select *
+    q = @db.query("select distinct *
                    from wp_posts as p
                    where p.post_type = 'post' and p.post_status = 'publish'
                    order by id desc")
@@ -88,6 +91,18 @@ class Wordpress
     q.each_hash { |c| os = OpenStruct.new(c) ; @categories[os.term_id.to_i] = OpenStruct.new(c) }
   end
 
+  def load_users
+    q = @db.query("select distinct u.*
+                   from wp_users as u
+                   join wp_posts as p
+                   on p.post_author = u.ID and p.post_type = 'post' and p.post_status = 'publish'")
+
+    q.each_hash do |u|
+      user = OpenStruct.new(u)
+      @users[u['ID']] = user
+    end
+  end
+
   def list_posts
     @posts.each do |p|
       puts %Q{#{p.ID} #{p.post_date} "#{p.post_title}" #{p.categories.map { |c| c.name }.join(',')} }
@@ -99,6 +114,13 @@ class Wordpress
           end
         end
 
+    end
+  end
+
+  def list_users
+    @users.keys.each do |u|
+      user = @users[u]
+      puts "#{user.ID} #{user.user_login} #{user.user_email} #{user.user_nicename}"
     end
   end
 

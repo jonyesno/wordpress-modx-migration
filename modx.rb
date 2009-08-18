@@ -107,7 +107,7 @@ class ModX
 
     # comments: clear out jot_content, jot_fields 
     q = @db.query(%Q{select id from modx_jot_content where uparent = #{p}})
-    q.each_hash do |jc|
+    q.each_hash do |jc| 
       @db.query(%Q{delete from modx_jot_fields where id = #{jc['id']}})
     end
     @db.query(%Q{delete from modx_jot_content where uparent = #{p}})
@@ -175,5 +175,41 @@ class ModX
                    values(#{jot_id}, 'url', '#{Mysql.quote(jot_fields[:url])}')})
     end
   end
+
+  def find_user(user)
+    q = @db.query(%Q{select id from modx_manager_users where username = '#{user[:username]}' limit 1})
+    if q.num_rows == 1
+      id = q.fetch_row[0]
+      STDERR.puts("[ModX:find_user] found user #{user[:username]} #{id}")
+      return id
+    else
+      return nil
+    end
+  end
+
+  def delete_user(user)
+    q = @db.query(%Q{select id from modx_manager_users where username = '#{user[:username]}'})
+    if q.num_rows > 0
+      STDERR.puts("[ModX:delete_user] removing user #{user[:username]}")
+    end
+    q.each_hash do |u|
+      @db.query(%Q{delete from modx_user_attributes where internalKey = #{u['id']}})
+    end
+    @db.query(%Q{delete from modx_manager_users where username = '#{user[:username]}'})
+  end
+
+  def add_user(user)
+    STDERR.puts("[ModX:add_user] new user #{user[:username]}")
+    @db.query(%Q{insert into modx_manager_users (username) values('#{user[:username]}')})
+    id = @db.insert_id
+
+    user.delete(:username)
+    user[:internalKey] = id
+    @db.query(%Q{insert into modx_user_attributes
+                 (#{user.keys.join(',')})
+                 values(#{user.keys.map {|k| user[k].is_a?(String) ? "'" + Mysql.quote(user[k]) + "'" : user[k] } .join(',') })})
+    return id
+  end
+
 end
 

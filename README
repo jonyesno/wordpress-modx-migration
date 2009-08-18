@@ -25,6 +25,9 @@ mappings need some additional work.
 
 ModX categories (tags) are denormalised into a per-post array.
 
+Wordpress users that own posts are migrated as ModX managers. Passwords
+aren't migrated.
+
 THANKS
 
 Thanks to Matthew Killock for letting me use his PHP script to guide
