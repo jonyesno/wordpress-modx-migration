@@ -58,6 +58,8 @@ class Migration
         text = Iconv.conv(cd['encoding'], 'utf8', text)
       rescue Iconv::IllegalSequence
         STDERR.puts "[migrate] charset: unable to convert #{ref} from #{cd['encoding']}, leaving intact"
+      rescue Iconv::InvalidEncoding
+        STDERR.puts "[migrate] charset: unable to convert #{ref} from #{cd['encoding']}, leaving intact"
       end
     end
     return text
