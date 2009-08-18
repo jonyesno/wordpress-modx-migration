@@ -1,3 +1,4 @@
+require 'config'
 require 'rubygems'
 require 'mysql'
 require 'ostruct'
