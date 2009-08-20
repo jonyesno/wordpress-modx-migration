@@ -16,8 +16,11 @@ module Config
       :user          => 'org',
       :pass          => '',
       :charset       => 'UTF8',
-      :root_template => 'Blog',
-      :root_content  => 'Blog',
+      :root_blog_template => 'Blog',
+      :root_blog_content  => 'Blog',
+      :root_pages_template => 'About',
+      :root_pages_content  => 'About',
+      :default_author => 1,
     }
   end
 end

@@ -6,7 +6,7 @@ require 'config'
 # unsure if this is easier than bending AR / DM to WP schema?
 class Wordpress
 
-  attr_reader :posts, :users
+  attr_reader :posts, :pages, :users
 
   def initialize
     @db = Mysql.init

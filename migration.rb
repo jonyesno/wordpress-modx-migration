@@ -6,21 +6,21 @@ require 'iconv'
 
 class Migration
 
-  def initialize
+  def initialize(root_template, root_content)
     @wp   = Wordpress.new
-    @modx = ModX.new(Config.modx[:root_template])
+    @modx = ModX.new(root_template)
 
     @template = @modx.post_template_id
-    @root     = @modx.find_content(:pagetitle => Config.modx[:root_content])
+    @root     = @modx.find_content(:pagetitle => root_content)
 
     @default_author = 1
 
     @user_map = {}
   end
-    
 
   def find_or_create_blog_year(date)
-    epochtime = date.strftime('%s')
+    date      = DateTime.parse(date)
+    epochtime = date.strftime('%s').to_i 
     parent    = @modx.find_content(:pagetitle => date.year.to_s)
 
     if (parent.nil?)
@@ -65,15 +65,18 @@ class Migration
     return text
   end
 
-  def migrate_all_posts
-    @wp.posts.each { |wp_post| self.migrate_post(wp_post) }
+  def migrate_all_pages
+    @wp.pages.each { |wp_post| self.migrate_post(wp_post, @root) }
   end
 
-  def migrate_post(wp_post)
+  def migrate_all_posts
+    @wp.posts.each { |wp_post| self.migrate_post(wp_post, self.find_or_create_blog_year(wp_post.post_date)) }
+  end
+
+  def migrate_post(wp_post, parent)
     # date to epochtime
     date      = DateTime.parse(wp_post.post_date)
-    epochtime = date.strftime('%s')
-    parent    = self.find_or_create_blog_year(date)
+    epochtime = date.strftime('%s').to_i # sigh
 
     # coerce to utf8
     content = self.make_utf8(wp_post.post_title[0 .. 20 ], wp_post.post_content)
@@ -97,11 +100,11 @@ class Migration
       :menuindex   => 0,
       :searchable  => 1,
       :cacheable   => 1,
-      :createdby   => @user_map[wp_post.post_author],
+      :createdby   => @user_map[wp_post.post_author] || Config.modx[:default_author],
       :createdon   => epochtime,
-      :editedby    => @user_map[wp_post.post_author],
+      :editedby    => @user_map[wp_post.post_author] || Config.modx[:default_author],
       :editedon    => epochtime,
-      :publishedby => @user_map[wp_post.post_author],
+      :publishedby => @user_map[wp_post.post_author] || Config.modx[:default_author],
       :publishedon => epochtime,
       :hidemenu    => 0
     }

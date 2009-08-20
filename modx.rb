@@ -41,11 +41,14 @@ class ModX
                      from modx_site_tmplvars as v join modx_site_tmplvar_templates as t
                      on v.id = t.tmplvarid
                      where v.name = "categories" and t.templateid = #{@post_template_id}})
-    unless q.num_rows == 1
-      raise RuntimeError, "couldn't discover 'categories' tmpvars id"
+
+    if q.num_rows == 1
+      @post_category_id = q.fetch_row[0]
+    else
+      STDERR.puts "[ModX:find_category_id] nothing for #{@post_template_id}"
+      @post_category_id = 0
     end
 
-    @post_category_id = q.fetch_row[0]
   end
 
   def find_content(opts)
@@ -131,6 +134,10 @@ class ModX
   end
 
   def add_post_categories(post, categories)
+    unless @post_category_id > 0
+      # if we don't have categores for this template in ModX then do nothing
+      return
+    end
     p = self.find_content(:pagetitle => post[:pagetitle], :pub_date => post[:pub_date])
 
     modx_cats = categories.join('||')
