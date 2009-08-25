@@ -26,12 +26,12 @@ module Config
       :user          => 'org',
       :pass          => '',
       :charset       => 'UTF8',
-      :root_blog_template => 'Blog',
-      :root_blog_content  => 'Blog',
-      :root_pages_template => 'About',
-      :root_pages_content  => 'About',
+      :root_blog_template     => 'Blog',
+      :root_blog_content      => 'Blog',
+      :root_pages_template    => 'About',
+      :root_pages_content     => 'About',
       :root_newsblog_template => 'Simple page',
-      :root_news_blog_content => 'Newsblog',
+      :root_newsblog_content  => 'Newsblog',
       :default_author => 1,
     }
   end
