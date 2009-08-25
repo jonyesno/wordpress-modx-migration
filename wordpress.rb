@@ -8,16 +8,16 @@ class Wordpress
 
   attr_reader :posts, :pages, :users
 
-  def initialize
+  def initialize(config)
     @db = Mysql.init
-    @db.options(Mysql::SET_CHARSET_NAME, Config.wordpress[:charset])
+    @db.options(Mysql::SET_CHARSET_NAME, config[:charset])
     @db.real_connect(
-      Config.wordpress[:host],
-      Config.wordpress[:user],
-      Config.wordpress[:pass],
-      Config.wordpress[:db]
+      config[:host],
+      config[:user],
+      config[:pass],
+      config[:db]
     )
-    @db.query("SET NAMES #{Config.wordpress[:charset]}")
+    @db.query("SET NAMES #{config[:charset]}")
 
     @posts      = []
     @pages      = []

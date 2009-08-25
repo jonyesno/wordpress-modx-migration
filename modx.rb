@@ -43,7 +43,7 @@ class ModX
                      where v.name = "categories" and t.templateid = #{@post_template_id}})
 
     if q.num_rows == 1
-      @post_category_id = q.fetch_row[0]
+      @post_category_id = q.fetch_row[0].to_i
     else
       STDERR.puts "[ModX:find_category_id] nothing for #{@post_template_id}"
       @post_category_id = 0

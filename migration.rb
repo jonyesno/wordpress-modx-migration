@@ -6,8 +6,8 @@ require 'iconv'
 
 class Migration
 
-  def initialize(root_template, root_content)
-    @wp   = Wordpress.new
+  def initialize(wordpress, root_template, root_content)
+    @wp   = Wordpress.new(wordpress)
     @modx = ModX.new(root_template)
 
     @template = @modx.post_template_id
