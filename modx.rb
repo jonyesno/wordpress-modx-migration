@@ -59,6 +59,9 @@ class ModX
     if opts.has_key?(:pub_date)
       where += %Q{ and pub_date = #{opts[:pub_date]} }
     end
+    if opts.has_key?(:parent)
+      where += %Q{ and parent = #{opts[:parent]} }
+    end
 
     q = @db.query(%Q{select id
                      from modx_site_content

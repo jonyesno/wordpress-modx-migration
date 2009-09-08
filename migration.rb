@@ -21,7 +21,7 @@ class Migration
   def find_or_create_blog_year(date)
     date      = DateTime.parse(date)
     epochtime = date.strftime('%s').to_i 
-    parent    = @modx.find_content(:pagetitle => date.year.to_s)
+    parent    = @modx.find_content(:pagetitle => date.year.to_s, :parent => @root)
 
     if (parent.nil?)
       STDERR.puts "[migrate] new year #{date.year}"
